@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { DecisionCanvasView } from "./components/DecisionCanvasView";
+import { SensitivityAnalysisView } from "./components/SensitivityAnalysisView";
 import { Sidebar } from "./components/Sidebar";
 import { getDb } from "./lib/db";
 import { useAppStore } from "./store/app-store";
@@ -50,6 +51,7 @@ function App() {
 			<Sidebar />
 			<main className="flex-1 min-w-0 flex flex-col overflow-hidden">
 				{activeView === "canvas" && <DecisionCanvasView />}
+				{activeView === "sensitivity" && <SensitivityAnalysisView />}
 			</main>
 		</div>
 	);
