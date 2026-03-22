@@ -56,7 +56,7 @@ export function Sidebar() {
 						key={view}
 						label={label}
 						active={activeView === view}
-						disabled={view !== "canvas"}
+						disabled={view !== "canvas" && view !== "sensitivity"}
 						onClick={() => setActiveView(view)}
 					/>
 				))}

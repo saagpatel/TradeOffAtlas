@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { archiveDecision } from "../lib/db";
+import { useAppStore } from "../store/app-store";
 import { useDecisionStore } from "../store/decision-store";
+import { useSensitivityStore } from "../store/sensitivity-store";
 import { EmptyState } from "./EmptyState";
 import { InlineEdit } from "./InlineEdit";
 import { NewDecisionModal } from "./NewDecisionModal";
@@ -13,6 +15,10 @@ export function DecisionCanvasView() {
 	const activeDecisionId = useDecisionStore((s) => s.activeDecisionId);
 	const loading = useDecisionStore((s) => s.loading);
 	const updateDecisionField = useDecisionStore((s) => s.updateDecisionField);
+	const criteria = useDecisionStore((s) => s.criteria);
+	const options = useDecisionStore((s) => s.options);
+
+	const setActiveView = useAppStore((s) => s.setActiveView);
 
 	const activeDecision = decisions.find((d) => d.id === activeDecisionId);
 
@@ -124,9 +130,19 @@ export function DecisionCanvasView() {
 
 			<footer className="px-8 py-4 border-t border-slate-800 flex items-center gap-4 shrink-0">
 				<button
-					disabled
-					className="px-4 py-2 rounded-lg text-sm font-medium text-slate-500 bg-slate-800 cursor-not-allowed"
-					title="Available in Phase 2"
+					onClick={() => {
+						useSensitivityStore.getState().loadFromDecision(
+							criteria,
+							options.map((o) => o.id),
+						);
+						setActiveView("sensitivity");
+					}}
+					disabled={criteria.length === 0 || options.length === 0}
+					className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150 ${
+						criteria.length === 0 || options.length === 0
+							? "text-slate-500 bg-slate-800 cursor-not-allowed"
+							: "text-accent-300 bg-accent-500/10 hover:bg-accent-500/20"
+					}`}
 				>
 					Run Sensitivity Analysis
 				</button>
