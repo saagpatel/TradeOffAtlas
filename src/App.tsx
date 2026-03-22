@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { DecisionCanvasView } from "./components/DecisionCanvasView";
 import { DecisionHistoryView } from "./components/DecisionHistoryView";
+import { KeyboardShortcutsModal } from "./components/KeyboardShortcutsModal";
+import { NewDecisionModal } from "./components/NewDecisionModal";
 import { SensitivityAnalysisView } from "./components/SensitivityAnalysisView";
 import { Sidebar } from "./components/Sidebar";
 import { TemplateLibraryView } from "./components/TemplateLibraryView";
 import { getDb } from "./lib/db";
+import { useKeyboardShortcuts } from "./lib/use-keyboard-shortcuts";
 import { useAppStore } from "./store/app-store";
 import { useDecisionStore } from "./store/decision-store";
 
@@ -12,6 +15,10 @@ function App() {
 	const [dbReady, setDbReady] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const activeView = useAppStore((s) => s.activeView);
+	const newDecisionModalOpen = useAppStore((s) => s.newDecisionModalOpen);
+	const setNewDecisionModalOpen = useAppStore((s) => s.setNewDecisionModalOpen);
+
+	useKeyboardShortcuts();
 
 	useEffect(() => {
 		getDb()
@@ -49,15 +56,22 @@ function App() {
 	}
 
 	return (
-		<div className="flex h-screen bg-slate-950 text-slate-100 font-sans antialiased">
-			<Sidebar />
-			<main className="flex-1 min-w-0 flex flex-col overflow-hidden">
-				{activeView === "canvas" && <DecisionCanvasView />}
-				{activeView === "sensitivity" && <SensitivityAnalysisView />}
-				{activeView === "templates" && <TemplateLibraryView />}
-				{activeView === "history" && <DecisionHistoryView />}
-			</main>
-		</div>
+		<>
+			<div className="flex h-screen bg-slate-950 text-slate-100 font-sans antialiased">
+				<Sidebar />
+				<main className="flex-1 min-w-0 flex flex-col overflow-hidden">
+					{activeView === "canvas" && <DecisionCanvasView />}
+					{activeView === "sensitivity" && <SensitivityAnalysisView />}
+					{activeView === "templates" && <TemplateLibraryView />}
+					{activeView === "history" && <DecisionHistoryView />}
+				</main>
+			</div>
+			<NewDecisionModal
+				open={newDecisionModalOpen}
+				onClose={() => setNewDecisionModalOpen(false)}
+			/>
+			<KeyboardShortcutsModal />
+		</>
 	);
 }
 
