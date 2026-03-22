@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getCriteria, getDecisions, getOptions, getScores } from "../lib/db";
 import { useAppStore } from "../store/app-store";
 import type { Criterion, Decision, Option } from "../types";
@@ -17,6 +17,10 @@ export function DecisionHistoryView() {
 	const [loadedData, setLoadedData] = useState<Record<number, LoadedData>>({});
 	const [loadingId, setLoadingId] = useState<number | null>(null);
 
+	const [searchQuery, setSearchQuery] = useState("");
+	const [dateFrom, setDateFrom] = useState("");
+	const [dateTo, setDateTo] = useState("");
+
 	const setActiveView = useAppStore((s) => s.setActiveView);
 
 	useEffect(() => {
@@ -26,6 +30,36 @@ export function DecisionHistoryView() {
 			)
 			.catch((err: unknown) => console.error("Failed to load history:", err));
 	}, []);
+
+	const filteredDecisions = useMemo(() => {
+		let result = archivedDecisions;
+		if (searchQuery.trim()) {
+			const q = searchQuery.toLowerCase();
+			result = result.filter(
+				(d) =>
+					d.name.toLowerCase().includes(q) ||
+					d.outcome.toLowerCase().includes(q) ||
+					d.outcomeNotes.toLowerCase().includes(q),
+			);
+		}
+		if (dateFrom) {
+			result = result.filter((d) => d.archivedAt && d.archivedAt >= dateFrom);
+		}
+		if (dateTo) {
+			const toEnd = dateTo + "T23:59:59";
+			result = result.filter((d) => d.archivedAt && d.archivedAt <= toEnd);
+		}
+		return result;
+	}, [archivedDecisions, searchQuery, dateFrom, dateTo]);
+
+	const hasActiveFilters =
+		searchQuery.trim() !== "" || dateFrom !== "" || dateTo !== "";
+
+	function clearFilters() {
+		setSearchQuery("");
+		setDateFrom("");
+		setDateTo("");
+	}
 
 	async function toggleExpand(id: number) {
 		if (expandedId === id) {
@@ -62,6 +96,55 @@ export function DecisionHistoryView() {
 				<p className="text-sm text-slate-400 mt-1">
 					Browse past decisions and their outcomes
 				</p>
+
+				{archivedDecisions.length > 0 && (
+					<div className="flex items-center gap-3 mt-4">
+						<div className="relative flex-1 max-w-sm">
+							<input
+								type="text"
+								placeholder="Search decisions..."
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none focus:ring-1 focus:ring-slate-600"
+							/>
+							<svg
+								className="absolute left-3 top-2.5 w-4 h-4 text-slate-500"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+								/>
+							</svg>
+						</div>
+						<input
+							type="date"
+							value={dateFrom}
+							onChange={(e) => setDateFrom(e.target.value)}
+							className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none focus:ring-1 focus:ring-slate-600"
+							title="From date"
+						/>
+						<input
+							type="date"
+							value={dateTo}
+							onChange={(e) => setDateTo(e.target.value)}
+							className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none focus:ring-1 focus:ring-slate-600"
+							title="To date"
+						/>
+						{hasActiveFilters && (
+							<button
+								onClick={clearFilters}
+								className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+							>
+								Clear
+							</button>
+						)}
+					</div>
+				)}
 			</header>
 
 			<div className="flex-1 overflow-auto px-8 py-6">
@@ -90,93 +173,111 @@ export function DecisionHistoryView() {
 							onClick: () => setActiveView("canvas"),
 						}}
 					/>
+				) : filteredDecisions.length === 0 ? (
+					<div className="text-center py-12">
+						<p className="text-slate-400">No decisions match your search</p>
+						<button
+							onClick={clearFilters}
+							className="mt-3 text-sm text-accent-400 hover:text-accent-300"
+						>
+							Clear filters
+						</button>
+					</div>
 				) : (
-					<div className="space-y-3">
-						{archivedDecisions.map((d) => (
-							<div
-								key={d.id}
-								className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden"
-							>
-								{/* Clickable header */}
-								<button
-									type="button"
-									onClick={() => {
-										toggleExpand(d.id).catch((err: unknown) =>
-											console.error("Failed to toggle expand:", err),
-										);
-									}}
-									className="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors duration-150"
+					<>
+						{hasActiveFilters && (
+							<p className="text-xs text-slate-500 mb-3">
+								Showing {filteredDecisions.length} of {archivedDecisions.length}{" "}
+								archived decisions
+							</p>
+						)}
+						<div className="space-y-3">
+							{filteredDecisions.map((d) => (
+								<div
+									key={d.id}
+									className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden"
 								>
-									<div className="min-w-0">
-										<h3 className="text-base font-bold text-slate-100">
-											{d.name}
-										</h3>
-										<div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-											<span>
-												Archived{" "}
-												{d.archivedAt
-													? new Date(d.archivedAt).toLocaleDateString()
-													: ""}
-											</span>
-											{d.outcome && (
-												<span className="text-slate-400">· {d.outcome}</span>
-											)}
-										</div>
-										{d.outcomeNotes && expandedId !== d.id && (
-											<p className="text-sm text-slate-500 mt-1 truncate max-w-lg">
-												{d.outcomeNotes}
-											</p>
-										)}
-									</div>
-
-									{/* Chevron */}
-									<svg
-										className={`w-5 h-5 text-slate-500 transition-transform duration-200 shrink-0 ${
-											expandedId === d.id ? "rotate-180" : ""
-										}`}
-										viewBox="0 0 20 20"
-										fill="currentColor"
+									{/* Clickable header */}
+									<button
+										type="button"
+										onClick={() => {
+											toggleExpand(d.id).catch((err: unknown) =>
+												console.error("Failed to toggle expand:", err),
+											);
+										}}
+										className="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors duration-150"
 									>
-										<path
-											fillRule="evenodd"
-											d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-											clipRule="evenodd"
-										/>
-									</svg>
-								</button>
-
-								{/* Expanded content */}
-								{expandedId === d.id && (
-									<div className="border-t border-slate-800 px-5 py-4">
-										{d.outcomeNotes && (
-											<div className="mb-4">
-												<h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-													Notes
-												</h4>
-												<p className="text-sm text-slate-300 whitespace-pre-wrap">
+										<div className="min-w-0">
+											<h3 className="text-base font-bold text-slate-100">
+												{d.name}
+											</h3>
+											<div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+												<span>
+													Archived{" "}
+													{d.archivedAt
+														? new Date(d.archivedAt).toLocaleDateString()
+														: ""}
+												</span>
+												{d.outcome && (
+													<span className="text-slate-400">· {d.outcome}</span>
+												)}
+											</div>
+											{d.outcomeNotes && expandedId !== d.id && (
+												<p className="text-sm text-slate-500 mt-1 truncate max-w-lg">
 													{d.outcomeNotes}
 												</p>
-											</div>
-										)}
+											)}
+										</div>
 
-										{loadingId === d.id ? (
-											<div className="py-8 animate-pulse space-y-2">
-												<div className="h-4 w-48 bg-slate-800 rounded" />
-												<div className="h-32 bg-slate-800/50 rounded-xl" />
-											</div>
-										) : loadedData[d.id] ? (
-											<div>
-												<h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-													Scoring Matrix
-												</h4>
-												<ScoringMatrix readOnly data={loadedData[d.id]} />
-											</div>
-										) : null}
-									</div>
-								)}
-							</div>
-						))}
-					</div>
+										{/* Chevron */}
+										<svg
+											className={`w-5 h-5 text-slate-500 transition-transform duration-200 shrink-0 ${
+												expandedId === d.id ? "rotate-180" : ""
+											}`}
+											viewBox="0 0 20 20"
+											fill="currentColor"
+										>
+											<path
+												fillRule="evenodd"
+												d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+												clipRule="evenodd"
+											/>
+										</svg>
+									</button>
+
+									{/* Expanded content */}
+									{expandedId === d.id && (
+										<div className="border-t border-slate-800 px-5 py-4">
+											{d.outcomeNotes && (
+												<div className="mb-4">
+													<h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+														Notes
+													</h4>
+													<p className="text-sm text-slate-300 whitespace-pre-wrap">
+														{d.outcomeNotes}
+													</p>
+												</div>
+											)}
+
+											{loadingId === d.id ? (
+												<div className="py-8 animate-pulse space-y-2">
+													<div className="h-4 w-48 bg-slate-800 rounded" />
+													<div className="h-32 bg-slate-800/50 rounded-xl" />
+												</div>
+											) : loadedData[d.id] ? (
+												<div>
+													<h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+														Scoring Matrix
+													</h4>
+													<ScoringMatrix readOnly data={loadedData[d.id]} />
+												</div>
+											) : null}
+										</div>
+									)}
+								</div>
+							))}
+						</div>
+					</>
 				)}
 			</div>
 		</div>
