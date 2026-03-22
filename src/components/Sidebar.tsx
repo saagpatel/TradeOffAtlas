@@ -1,43 +1,44 @@
-import { useState } from "react";
 import type { AppView } from "../store/app-store";
 import { useAppStore } from "../store/app-store";
 import { useDecisionStore } from "../store/decision-store";
-import { NewDecisionModal } from "./NewDecisionModal";
 
 type NavItemProps = {
 	label: string;
 	active?: boolean;
 	onClick?: () => void;
+	shortcut?: string;
 };
 
-function NavItem({ label, active, onClick }: NavItemProps) {
+function NavItem({ label, active, onClick, shortcut }: NavItemProps) {
 	return (
 		<button
 			onClick={onClick}
-			className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors duration-150
+			className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors duration-150 flex items-center
 				${active ? "bg-slate-800 text-slate-100 font-semibold" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"}`}
 		>
-			{label}
+			<span className="flex-1">{label}</span>
+			{shortcut && (
+				<kbd className="text-[10px] text-slate-600 font-mono">{shortcut}</kbd>
+			)}
 		</button>
 	);
 }
 
-const NAV_ITEMS: { label: string; view: AppView }[] = [
-	{ label: "Decision Canvas", view: "canvas" },
-	{ label: "Sensitivity Analysis", view: "sensitivity" },
-	{ label: "Templates", view: "templates" },
-	{ label: "History", view: "history" },
+const NAV_ITEMS: { label: string; view: AppView; shortcut: string }[] = [
+	{ label: "Decision Canvas", view: "canvas", shortcut: "⌘1" },
+	{ label: "Sensitivity Analysis", view: "sensitivity", shortcut: "⌘2" },
+	{ label: "Templates", view: "templates", shortcut: "⌘3" },
+	{ label: "History", view: "history", shortcut: "⌘4" },
 ];
 
 export function Sidebar() {
-	const [showNewDecisionModal, setShowNewDecisionModal] = useState(false);
-
 	const decisions = useDecisionStore((s) => s.decisions);
 	const activeDecisionId = useDecisionStore((s) => s.activeDecisionId);
 	const setActiveDecision = useDecisionStore((s) => s.setActiveDecision);
 
 	const activeView = useAppStore((s) => s.activeView);
 	const setActiveView = useAppStore((s) => s.setActiveView);
+	const setNewDecisionModalOpen = useAppStore((s) => s.setNewDecisionModalOpen);
 
 	return (
 		<aside className="w-60 h-screen bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
@@ -48,12 +49,13 @@ export function Sidebar() {
 
 			{/* Navigation */}
 			<nav className="px-3 pb-4">
-				{NAV_ITEMS.map(({ label, view }) => (
+				{NAV_ITEMS.map(({ label, view, shortcut }) => (
 					<NavItem
 						key={view}
 						label={label}
 						active={activeView === view}
 						onClick={() => setActiveView(view)}
+						shortcut={shortcut}
 					/>
 				))}
 			</nav>
@@ -87,17 +89,13 @@ export function Sidebar() {
 			{/* New Decision button */}
 			<div className="p-4 border-t border-slate-800">
 				<button
-					onClick={() => setShowNewDecisionModal(true)}
-					className="w-full bg-accent-400 text-slate-950 font-semibold py-2.5 rounded-xl hover:bg-accent-500 transition-colors duration-150 text-sm"
+					onClick={() => setNewDecisionModalOpen(true)}
+					className="w-full bg-accent-400 text-slate-950 font-semibold py-2.5 rounded-xl hover:bg-accent-500 transition-colors duration-150 text-sm flex items-center justify-center gap-2"
 				>
-					+ New Decision
+					<span>+ New Decision</span>
+					<kbd className="text-[10px] font-mono opacity-60">⌘N</kbd>
 				</button>
 			</div>
-
-			<NewDecisionModal
-				open={showNewDecisionModal}
-				onClose={() => setShowNewDecisionModal(false)}
-			/>
 		</aside>
 	);
 }
