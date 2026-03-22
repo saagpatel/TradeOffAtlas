@@ -1,15 +1,18 @@
 import { useState } from "react";
-import { archiveDecision } from "../lib/db";
 import { useAppStore } from "../store/app-store";
 import { useDecisionStore } from "../store/decision-store";
 import { useSensitivityStore } from "../store/sensitivity-store";
+import { ArchiveDecisionModal } from "./ArchiveDecisionModal";
 import { EmptyState } from "./EmptyState";
 import { InlineEdit } from "./InlineEdit";
 import { NewDecisionModal } from "./NewDecisionModal";
+import { SaveTemplateModal } from "./SaveTemplateModal";
 import { ScoringMatrix } from "./ScoringMatrix";
 
 export function DecisionCanvasView() {
 	const [showNewDecisionModal, setShowNewDecisionModal] = useState(false);
+	const [showArchiveModal, setShowArchiveModal] = useState(false);
+	const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
 
 	const decisions = useDecisionStore((s) => s.decisions);
 	const activeDecisionId = useDecisionStore((s) => s.activeDecisionId);
@@ -21,20 +24,6 @@ export function DecisionCanvasView() {
 	const setActiveView = useAppStore((s) => s.setActiveView);
 
 	const activeDecision = decisions.find((d) => d.id === activeDecisionId);
-
-	async function handleArchive() {
-		if (!activeDecisionId) return;
-		const confirmed = window.confirm(
-			`Archive "${activeDecision?.name}"? This will move it to the decision history.`,
-		);
-		if (!confirmed) return;
-		await archiveDecision(activeDecisionId, {
-			outcome: "Archived without outcome",
-		});
-		const store = useDecisionStore.getState();
-		await store.loadDecisions();
-		await store.setActiveDecision(null);
-	}
 
 	if (loading) {
 		return (
@@ -147,12 +136,27 @@ export function DecisionCanvasView() {
 					Run Sensitivity Analysis
 				</button>
 				<button
-					onClick={() => void handleArchive()}
+					onClick={() => setShowSaveTemplateModal(true)}
+					disabled={criteria.length === 0}
+					className="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-accent-300 hover:bg-accent-500/10 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+				>
+					Save as Template
+				</button>
+				<button
+					onClick={() => setShowArchiveModal(true)}
 					className="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-colors duration-150"
 				>
 					Archive Decision
 				</button>
 			</footer>
+			<ArchiveDecisionModal
+				open={showArchiveModal}
+				onClose={() => setShowArchiveModal(false)}
+			/>
+			<SaveTemplateModal
+				open={showSaveTemplateModal}
+				onClose={() => setShowSaveTemplateModal(false)}
+			/>
 		</div>
 	);
 }
