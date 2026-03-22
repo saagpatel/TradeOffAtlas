@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { DecisionCanvasView } from "./components/DecisionCanvasView";
+import { DecisionHistoryView } from "./components/DecisionHistoryView";
 import { SensitivityAnalysisView } from "./components/SensitivityAnalysisView";
 import { Sidebar } from "./components/Sidebar";
+import { TemplateLibraryView } from "./components/TemplateLibraryView";
 import { getDb } from "./lib/db";
 import { useAppStore } from "./store/app-store";
 import { useDecisionStore } from "./store/decision-store";
@@ -52,6 +54,8 @@ function App() {
 			<main className="flex-1 min-w-0 flex flex-col overflow-hidden">
 				{activeView === "canvas" && <DecisionCanvasView />}
 				{activeView === "sensitivity" && <SensitivityAnalysisView />}
+				{activeView === "templates" && <TemplateLibraryView />}
+				{activeView === "history" && <DecisionHistoryView />}
 			</main>
 		</div>
 	);

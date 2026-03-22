@@ -7,18 +7,15 @@ import { NewDecisionModal } from "./NewDecisionModal";
 type NavItemProps = {
 	label: string;
 	active?: boolean;
-	disabled?: boolean;
 	onClick?: () => void;
 };
 
-function NavItem({ label, active, disabled, onClick }: NavItemProps) {
+function NavItem({ label, active, onClick }: NavItemProps) {
 	return (
 		<button
-			onClick={disabled ? undefined : onClick}
-			disabled={disabled}
+			onClick={onClick}
 			className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors duration-150
-				${active ? "bg-slate-800 text-slate-100 font-semibold" : ""}
-				${disabled ? "text-slate-600 cursor-not-allowed" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"}`}
+				${active ? "bg-slate-800 text-slate-100 font-semibold" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"}`}
 		>
 			{label}
 		</button>
@@ -56,7 +53,6 @@ export function Sidebar() {
 						key={view}
 						label={label}
 						active={activeView === view}
-						disabled={view !== "canvas" && view !== "sensitivity"}
 						onClick={() => setActiveView(view)}
 					/>
 				))}
