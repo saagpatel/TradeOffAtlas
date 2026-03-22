@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import type { ExportFormat } from "../lib/export";
+import { exportToFile } from "../lib/export";
+import { rankOptions } from "../lib/scoring";
 import { useAppStore } from "../store/app-store";
 import { useDecisionStore } from "../store/decision-store";
 import { useSensitivityStore } from "../store/sensitivity-store";
 import { ArchiveDecisionModal } from "./ArchiveDecisionModal";
 import { EmptyState } from "./EmptyState";
+import { ExportDropdown } from "./ExportDropdown";
 import { InlineEdit } from "./InlineEdit";
-import { NewDecisionModal } from "./NewDecisionModal";
 import { SaveTemplateModal } from "./SaveTemplateModal";
 import { ScoringMatrix } from "./ScoringMatrix";
 
 export function DecisionCanvasView() {
-	const [showNewDecisionModal, setShowNewDecisionModal] = useState(false);
 	const [showArchiveModal, setShowArchiveModal] = useState(false);
 	const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
 
@@ -20,8 +22,29 @@ export function DecisionCanvasView() {
 	const updateDecisionField = useDecisionStore((s) => s.updateDecisionField);
 	const criteria = useDecisionStore((s) => s.criteria);
 	const options = useDecisionStore((s) => s.options);
+	const scores = useDecisionStore((s) => s.scores);
 
 	const setActiveView = useAppStore((s) => s.setActiveView);
+
+	const rankings = useMemo(
+		() => rankOptions(options, scores, criteria),
+		[options, scores, criteria],
+	);
+
+	async function handleExport(format: ExportFormat) {
+		if (!activeDecision) return;
+		await exportToFile(
+			{
+				decisionName: activeDecision.name,
+				decisionDescription: activeDecision.description,
+				options,
+				criteria,
+				scores,
+				rankings,
+			},
+			format,
+		).catch((err: unknown) => console.error("Export failed:", err));
+	}
 
 	const activeDecision = decisions.find((d) => d.id === activeDecisionId);
 
@@ -37,37 +60,31 @@ export function DecisionCanvasView() {
 
 	if (!activeDecision && decisions.length === 0) {
 		return (
-			<>
-				<div className="flex flex-1 items-center justify-center">
-					<EmptyState
-						icon={
-							<svg
-								width="48"
-								height="48"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="1.5"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-							>
-								<path d="M12 3v1m0 16v1M4.22 4.22l.71.71m13.66 13.66.71.71M3 12H2m20 0h-1M4.22 19.78l.71-.71M18.36 5.64l.71-.71" />
-								<circle cx="12" cy="12" r="4" />
-							</svg>
-						}
-						title="No decisions yet"
-						description="Create your first decision to start weighing your options."
-						action={{
-							label: "New Decision",
-							onClick: () => setShowNewDecisionModal(true),
-						}}
-					/>
-				</div>
-				<NewDecisionModal
-					open={showNewDecisionModal}
-					onClose={() => setShowNewDecisionModal(false)}
+			<div className="flex flex-1 items-center justify-center">
+				<EmptyState
+					icon={
+						<svg
+							width="48"
+							height="48"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="1.5"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						>
+							<path d="M12 3v1m0 16v1M4.22 4.22l.71.71m13.66 13.66.71.71M3 12H2m20 0h-1M4.22 19.78l.71-.71M18.36 5.64l.71-.71" />
+							<circle cx="12" cy="12" r="4" />
+						</svg>
+					}
+					title="No decisions yet"
+					description="Create your first decision to start weighing your options."
+					action={{
+						label: "New Decision",
+						onClick: () => useAppStore.getState().setNewDecisionModalOpen(true),
+					}}
 				/>
-			</>
+			</div>
 		);
 	}
 
@@ -135,6 +152,10 @@ export function DecisionCanvasView() {
 				>
 					Run Sensitivity Analysis
 				</button>
+				<ExportDropdown
+					onExport={handleExport}
+					disabled={criteria.length === 0 || options.length === 0}
+				/>
 				<button
 					onClick={() => setShowSaveTemplateModal(true)}
 					disabled={criteria.length === 0}
