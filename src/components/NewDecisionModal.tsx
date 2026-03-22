@@ -7,9 +7,14 @@ import { Modal } from "./Modal";
 type NewDecisionModalProps = {
 	open: boolean;
 	onClose: () => void;
+	defaultTemplateId?: number | null;
 };
 
-export function NewDecisionModal({ open, onClose }: NewDecisionModalProps) {
+export function NewDecisionModal({
+	open,
+	onClose,
+	defaultTemplateId,
+}: NewDecisionModalProps) {
 	const [name, setName] = useState("");
 	const [description, setDescription] = useState("");
 	const [templateId, setTemplateId] = useState<number | null>(null);
@@ -19,12 +24,15 @@ export function NewDecisionModal({ open, onClose }: NewDecisionModalProps) {
 	useEffect(() => {
 		if (open) {
 			getTemplates()
-				.then(setTemplates)
+				.then((t) => {
+					setTemplates(t);
+					setTemplateId(defaultTemplateId ?? null);
+				})
 				.catch((err: unknown) => {
 					console.error("Failed to load templates:", err);
 				});
 		}
-	}, [open]);
+	}, [open, defaultTemplateId]);
 
 	function handleClose() {
 		setName("");
