@@ -1,6 +1,6 @@
 [package]
 name = "tradeoff-atlas"
-version = "0.1.0"
+version = "1.0.0"
 description = "Multi-criteria decision modeling tool"
 authors = ["you"]
 edition = "2021"
