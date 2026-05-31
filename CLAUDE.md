@@ -1,9 +1,8 @@
 # Tradeoff Atlas
 
-## Overview
-A local-first Tauri 2.0 desktop app for multi-criteria decision modeling. Define decisions, score options against weighted criteria, run sensitivity analysis, save reusable templates, and archive past decisions with outcomes. Built for solo use — all data stored in SQLite on-device, no backend, no sync.
+Local-first Tauri 2.0 desktop app for multi-criteria decision modeling — define decisions, score options against weighted criteria, run sensitivity analysis, save templates, archive past decisions. Solo use only; all data in SQLite on-device, no backend, no sync.
 
-## Tech Stack
+## Stack
 - Shell: Tauri 2.0 (Rust sidecar, macOS-first)
 - Frontend: React 19 + TypeScript (strict mode)
 - Storage: SQLite via `@tauri-apps/plugin-sql`
@@ -11,18 +10,20 @@ A local-first Tauri 2.0 desktop app for multi-criteria decision modeling. Define
 - Styling: Tailwind CSS 4.x (utility-first, dark theme default)
 - Build: Vite 7.x
 
-## Development Conventions
-- TypeScript strict mode — no `any` types, no type assertions without comment justification
-- File naming: kebab-case for files, PascalCase for React components
-- Component naming: suffix views with `View` (e.g., `DecisionCanvasView`), modals with `Modal`
-- All DB operations go through `src/lib/db.ts` — no raw SQL in components
-- Git: conventional commits — `feat:`, `fix:`, `chore:`, `refactor:`
-- Each phase gets its own branch: `phase-0`, `phase-1`, etc.
+## Build / Test / Run
 
-## Current Phase
-**v1.0.0 — Shipped** (all phases complete; see IMPLEMENTATION-ROADMAP.md for the original phase breakdown)
+```bash
+# Development mode
+npm run tauri dev
 
-## Key Decisions
+# Run tests
+npm test
+
+# Production build
+npm run tauri build
+```
+
+## Architecture Decisions
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | State management | Zustand | Simpler than Redux for solo Tauri app; avoids prop drilling across 4 views |
@@ -33,14 +34,20 @@ A local-first Tauri 2.0 desktop app for multi-criteria decision modeling. Define
 | Template storage | DB table (not file export) | Keeps templates queryable and avoids filesystem permission complexity |
 | App window size | 1200×800 min, resizable | Enough space for 6-option × 8-criteria matrix without horizontal scroll |
 
-## Do NOT
-- Do not add features not in the current phase of IMPLEMENTATION-ROADMAP.md
-- Do not write raw SQL in React components — all queries go through `src/lib/db.ts`
-- Do not store any user data outside SQLite — no localStorage, no JSON flat files, no Tauri store plugin
-- Do not add cloud sync, user accounts, or any network calls — this app is permanently local-only
-- Do not scaffold all phases at once — complete phase verification checklist before starting next phase
-- Do not use class components — hooks + Zustand only
-- Do not recompute sensitivity scores in the database — do it in-memory in the Zustand store
+## Conventions
+- TypeScript strict mode — type with `unknown` + narrowing; assertions require a comment justification
+- File naming: kebab-case for files, PascalCase for React components
+- Component naming: suffix views with `View` (e.g., `DecisionCanvasView`), modals with `Modal`
+- All DB operations go through `src/lib/db.ts` — raw SQL in components fails the pattern
+- Sensitivity scores recompute in-memory in the Zustand store — no DB writes during analysis
+- User data lives exclusively in SQLite — no localStorage, no JSON flat files, no Tauri store plugin
+- App is permanently local-only — no cloud sync, user accounts, or network calls
+- Use hooks + Zustand; class components are out of pattern
+- Scope new work to the current phase in IMPLEMENTATION-ROADMAP.md; complete the phase verification checklist before starting the next phase
+- Git: conventional commits — `feat:`, `fix:`, `chore:`, `refactor:`; each phase gets its own branch (`phase-0`, `phase-1`, etc.)
+
+## Status
+v1.0.0 — Shipped (all phases complete; see IMPLEMENTATION-ROADMAP.md for phase breakdown)
 
 <!-- portfolio-context:start -->
 # Portfolio Context
