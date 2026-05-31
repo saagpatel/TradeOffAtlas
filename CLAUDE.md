@@ -5,11 +5,11 @@ A local-first Tauri 2.0 desktop app for multi-criteria decision modeling. Define
 
 ## Tech Stack
 - Shell: Tauri 2.0 (Rust sidecar, macOS-first)
-- Frontend: React 18 + TypeScript (strict mode)
+- Frontend: React 19 + TypeScript (strict mode)
 - Storage: SQLite via `@tauri-apps/plugin-sql`
-- Charts: Recharts 2.x — radar chart + bar chart for sensitivity analysis
-- Styling: Tailwind CSS 3.x (utility-first, dark theme default)
-- Build: Vite 5.x
+- Charts: Recharts 3.x — radar chart + bar chart for sensitivity analysis
+- Styling: Tailwind CSS 4.x (utility-first, dark theme default)
+- Build: Vite 7.x
 
 ## Development Conventions
 - TypeScript strict mode — no `any` types, no type assertions without comment justification
@@ -20,8 +20,7 @@ A local-first Tauri 2.0 desktop app for multi-criteria decision modeling. Define
 - Each phase gets its own branch: `phase-0`, `phase-1`, etc.
 
 ## Current Phase
-**Phase 0: Foundation**
-See IMPLEMENTATION-ROADMAP.md for full phase details and acceptance criteria.
+**v1.0.0 — Shipped** (all phases complete; see IMPLEMENTATION-ROADMAP.md for the original phase breakdown)
 
 ## Key Decisions
 | Decision | Choice | Rationale |
@@ -52,17 +51,16 @@ A local-first Tauri 2.0 desktop app for multi-criteria decision modeling. Define
 
 ## Current State
 
-**Phase 0: Foundation**
-See IMPLEMENTATION-ROADMAP.md for full phase details and acceptance criteria.
+**v1.0.0 — Shipped** (all phases complete; see IMPLEMENTATION-ROADMAP.md for the original phase breakdown)
 
 ## Stack
 
 - Shell: Tauri 2.0 (Rust sidecar, macOS-first)
-- Frontend: React 18 + TypeScript (strict mode)
+- Frontend: React 19 + TypeScript (strict mode)
 - Storage: SQLite via `@tauri-apps/plugin-sql`
-- Charts: Recharts 2.x — radar chart + bar chart for sensitivity analysis
-- Styling: Tailwind CSS 3.x (utility-first, dark theme default)
-- Build: Vite 5.x
+- Charts: Recharts 3.x — radar chart + bar chart for sensitivity analysis
+- Styling: Tailwind CSS 4.x (utility-first, dark theme default)
+- Build: Vite 7.x
 
 ## How To Run
 
