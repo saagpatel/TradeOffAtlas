@@ -15,21 +15,22 @@ corrected, so the operator can batch-review with confidence.
 **Status: consistent**
 **Evidence: verified-by-reading-code**
 
-`src/App.tsx` is the entry point and wires all four views: `DecisionCanvasView`, `SensitivityAnalysisView`,
-`TemplateLibraryView`, `DecisionHistoryView`. `src/lib/db.ts`, `src/lib/scoring.ts`, and `src/types/index.ts`
-confirm the local-first SQLite multi-criteria decision analysis description. The README intro and CLAUDE.md
-overview both match the actual code structure.
+`src/App.tsx` is the entry point; it wires all four views: `DecisionCanvasView`,
+`SensitivityAnalysisView`, `TemplateLibraryView`, `DecisionHistoryView`. `src/lib/db.ts`,
+`src/lib/scoring.ts`, and `src/types/index.ts` confirm the local-first SQLite multi-criteria
+decision-analysis description. The README intro and CLAUDE.md overview both match the actual code
+structure. No changes needed.
 
 ---
 
 ### 2. Current state
 
-**Status: drifted → fixed**
+**Status: consistent**
 **Evidence: verified-by-reading-code**
 
-`CLAUDE.md` and its embedded portfolio-context block stated "Current Phase: **Phase 0: Foundation**" — the
-earliest phase of the implementation roadmap. The code, however, contains fully implemented components
-spanning all phases:
+`package.json` version is `1.0.0`. Both `README.md` and `CLAUDE.md` already state
+"v1.0.0 — Shipped (all phases complete)" — corrected by the prior reconciliation pass
+(`f61b811`). All four phase deliverables are present in source:
 
 - Phase 0 (foundation): `src/lib/db.ts`, `src/lib/scoring.ts`, `src/types/index.ts` ✓
 - Phase 1 (decision canvas + scoring matrix): `DecisionCanvasView.tsx`, `ScoringMatrix.tsx`,
@@ -38,38 +39,32 @@ spanning all phases:
   `RadarChart.tsx`, `RankChangeAlert.tsx`, `src/store/sensitivity-store.ts` ✓
 - Phase 3 (templates + history): `TemplateLibraryView.tsx`, `SaveTemplateModal.tsx`,
   `ArchiveDecisionModal.tsx`, `DecisionHistoryView.tsx` ✓
-- Beyond roadmap: `src/lib/export.ts`, `src/components/ExportDropdown.tsx` (PDF + CSV export);
-  `src/lib/use-keyboard-shortcuts.ts`, `src/components/KeyboardShortcutsModal.tsx` ✓
+- Beyond roadmap: `src/lib/export.ts` + `ExportDropdown.tsx` (PDF + CSV export);
+  `src/lib/use-keyboard-shortcuts.ts` + `KeyboardShortcutsModal.tsx` ✓
 
-`package.json` shows `"version": "1.0.0"`, and `git log` includes `615a79c chore: bump version to 1.0.0`.
-
-**Changes made:**
-- `CLAUDE.md` line 22: `**Phase 0: Foundation**\nSee IMPLEMENTATION-ROADMAP.md...` →
-  `**v1.0.0 — Shipped** (all phases complete; see IMPLEMENTATION-ROADMAP.md...)`
-- `CLAUDE.md` line 55 (portfolio-context block): same correction applied to the `## Current State` section
+No changes needed.
 
 ---
 
 ### 3. Stack
 
-**Status: drifted → fixed**
-**Evidence: verified-by-reading-code (`package.json`)**
+**Status: consistent**
+**Evidence: verified-by-reading-code (`package.json`, `src-tauri/Cargo.toml`)**
 
-`CLAUDE.md` listed stale dependency versions that contradict `package.json`:
+All technology versions claimed in `README.md` and `CLAUDE.md` match the manifests:
 
-| Field | CLAUDE.md claimed | Actual (`package.json`) | Fixed |
-|---|---|---|---|
-| Frontend | React 18 | react `^19.1.0` | React 19 |
-| Charts | Recharts 2.x | recharts `3.8.0` | Recharts 3.x |
-| Styling | Tailwind CSS 3.x | tailwindcss `4.2.2` | Tailwind CSS 4.x |
-| Build | Vite 5.x | vite `^7.0.4` | Vite 7.x |
+| Layer | Claimed | Actual |
+|---|---|---|
+| Desktop shell | Tauri 2 | `@tauri-apps/cli: ^2`, `tauri = { version = "2" }` in Cargo.toml ✓ |
+| Frontend | React 19, TypeScript 5.8 | `react: ^19.1.0`, `typescript: ~5.8.3` ✓ |
+| Styling | Tailwind CSS 4 | `tailwindcss: 4.2.2` ✓ |
+| State | Zustand 5 | `zustand: 5.0.12` ✓ |
+| Charts | Recharts 3 | `recharts: 3.8.0` ✓ |
+| Database | SQLite via tauri-plugin-sql | `tauri-plugin-sql = { version = "2", features = ["sqlite"] }` ✓ |
+| Export | jsPDF + jspdf-autotable | `jspdf: 4.2.1`, `jspdf-autotable: 5.0.7` ✓ |
+| Tests | Vitest 4 | `vitest: 4.1.0` ✓ |
 
-`README.md` already had the correct versions (React 19, Tailwind CSS 4, Recharts 3, Vitest 4,
-Zustand 5) and required no changes.
-
-**Changes made (two locations in CLAUDE.md):**
-- `## Tech Stack` section: four version strings updated as shown above
-- `## Stack` section inside `<!-- portfolio-context -->` block: same four strings updated
+No changes needed.
 
 ---
 
@@ -79,24 +74,26 @@ Zustand 5) and required no changes.
 **Evidence: verified-by-reading-code (`package.json` scripts)**
 
 `README.md` and `CLAUDE.md` document three commands:
-- `npm run tauri dev` — script `"tauri": "tauri"` + Tauri CLI present ✓
-- `npm test` — script `"test": "vitest run"` ✓
+
+- `npm run tauri dev` — `"tauri": "tauri"` script present ✓
+- `npm test` — `"test": "vitest run"` script present ✓
 - `npm run tauri build` — same `"tauri"` script target ✓
 
-All three commands are defined and match the docs. No changes needed.
+No changes needed.
 
 ---
 
-### 5. Known risks / Do-NOT rules
+### 5. Known risks
 
 **Status: consistent**
 **Evidence: verified-by-reading-code**
 
-CLAUDE.md's "Do NOT" list prohibits raw SQL in components, localStorage, cloud sync, class components,
-and in-DB sensitivity recomputation. Spot-checks confirm the code respects these constraints:
-- `src/lib/db.ts` centralizes all SQL; no raw SQL calls found in component files
-- `src/store/sensitivity-store.ts` is purely in-memory (no DB writes on weight changes)
-- No `localStorage` usage detected in source files
+`CLAUDE.md`'s do-not list (no raw SQL in components, no localStorage, no cloud sync, no class
+components, no in-DB sensitivity recomputation) is respected by the code:
+
+- All SQL goes through `src/lib/db.ts`; no raw SQL calls found in component files.
+- `src/store/sensitivity-store.ts` is purely in-memory — no DB writes on weight changes.
+- No `localStorage` usage detected in source files.
 
 No changes needed.
 
@@ -107,32 +104,63 @@ No changes needed.
 **Status: unverifiable**
 **Evidence: unverifiable-because-forward-looking**
 
-CLAUDE.md's "Next Recommended Move" reads: *"Use this context plus the README and supporting docs to
-resume the next active task, then promote the repo beyond minimum-viable by capturing a dedicated
-handoff, roadmap, or discovery artifact."* This is an advisory note, not a factual claim about the
-code. `docs/PORTFOLIO-DISPOSITION.md` classifies the project as "Release Frozen" at v1.0.0 with
-"Resurface conditions" around Apple signing and cross-platform verification. Left unchanged —
-unverifiable forward-looking guidance.
+`CLAUDE.md`'s "Next Recommended Move" reads: *"Use this context plus the README and supporting
+docs to resume the next active task, then promote the repo beyond minimum-viable by capturing a
+dedicated handoff, roadmap, or discovery artifact."* `docs/PORTFOLIO-DISPOSITION.md` now serves
+as that artifact (added in `5313fe9`), classifying the project as "Release Frozen" at v1.0.0.
+The guidance is advisory; left unchanged.
+
+---
+
+### Additional drifted claims fixed in this pass
+
+Two factual inaccuracies were found in `README.md`'s Architecture section and Features list:
+
+**Drift A — Export feature description (README.md line 15)**
+
+`src/components/ExportDropdown.tsx:49–67` exposes two export options: "Export as CSV" and
+"Export as PDF". `src/lib/export.ts:18` declares `ExportFormat = "csv" | "pdf"`. The README
+listed only "PDF export."
+
+- `README.md` line 15 before → after:
+  `**PDF export** — generate a formatted summary...`
+  → `**PDF and CSV export** — generate a formatted summary...`
+
+**Drift B — Template storage mechanism (README.md line 62)**
+
+`src/lib/db.ts` stores templates in two relational tables (`templates` and `template_criteria`)
+via parameterized INSERT statements — not as JSON blobs. The README's claim about "JSON blobs"
+and "without schema migrations" was factually wrong.
+
+- `README.md` line 62 before → after:
+  `Decision templates are stored as JSON blobs in SQLite so they can be imported and exported without schema migrations.`
+  → `Decision templates are stored as normalized rows in SQLite — a \`templates\` table plus a \`template_criteria\` table — keeping criteria queryable without custom serialization.`
 
 ---
 
 ## Contradictions for Manual Review
 
-These drifts exist in `IMPLEMENTATION-ROADMAP.md`, which is outside the editable doc set. A human
-should apply these corrections:
+These drifts exist in `IMPLEMENTATION-ROADMAP.md`, which is outside the editable doc set.
+The items below were also flagged in the prior reconciliation (`f61b811`) and remain unresolved.
 
 | Location | What is wrong | One-line fix |
 |---|---|---|
-| `IMPLEMENTATION-ROADMAP.md:351` | "Deferred (v2+): Export decision to PDF/CSV" | Change to "Shipped in v1.0.0 — see `src/lib/export.ts` and `ExportDropdown.tsx`" |
-| `IMPLEMENTATION-ROADMAP.md:353` | "Deferred (v2+): Keyboard shortcuts and command palette" | Change to "Shipped in v1.0.0 — see `src/lib/use-keyboard-shortcuts.ts` and `KeyboardShortcutsModal.tsx`" |
-| `IMPLEMENTATION-ROADMAP.md:357` | "Mobile or Windows builds (macOS-first)" listed as out of scope | README and PORTFOLIO-DISPOSITION both confirm cross-platform (macOS + Windows + Linux); update to "cross-platform desktop — macOS, Windows, Linux" |
-| `IMPLEMENTATION-ROADMAP.md` file structure | Shows `tailwind.config.js` in project root | Tailwind 4 uses the `@tailwindcss/vite` plugin; no `tailwind.config.js` exists. Remove from the listed structure. |
-| `IMPLEMENTATION-ROADMAP.md` file structure | Store files listed as `decisionStore.ts` / `sensitivityStore.ts` | Actual files are `decision-store.ts` / `sensitivity-store.ts` (kebab-case, per project convention) |
+| `IMPLEMENTATION-ROADMAP.md:351` | "Deferred (v2+): Export decision to PDF/CSV" | Change to: "Shipped in v1.0.0 — see `src/lib/export.ts` and `ExportDropdown.tsx`" |
+| `IMPLEMENTATION-ROADMAP.md:353` | "Deferred (v2+): Keyboard shortcuts and command palette" | Change to: "Shipped in v1.0.0 — see `src/lib/use-keyboard-shortcuts.ts` and `KeyboardShortcutsModal.tsx`" |
+| `IMPLEMENTATION-ROADMAP.md:357` | "Mobile or Windows builds (macOS-first)" listed as out of scope | README and PORTFOLIO-DISPOSITION both confirm cross-platform (macOS + Windows + Linux); update accordingly |
+| `IMPLEMENTATION-ROADMAP.md` file structure | Shows `tailwind.config.js` in project root | No such file exists; Tailwind 4 uses `@tailwindcss/vite` plugin. Remove from listed structure. |
+| `IMPLEMENTATION-ROADMAP.md` file structure | Store files listed as `decisionStore.ts` / `sensitivityStore.ts` | Actual files are `decision-store.ts` / `sensitivity-store.ts` (kebab-case per project convention) |
+| `IMPLEMENTATION-ROADMAP.md` file structure | Shows `database/migrations/002_add_history_notes.sql` | File does not exist; only `001_initial_schema.sql` is present |
+
+Minor metadata note — `docs/PORTFOLIO-DISPOSITION.md` cites `origin/main` tip as `328e4b0`
+(written before commits `5313fe9`, `f61b811`, `bd59e96`). All three intervening commits are
+docs-only; the disposition's functional content (status, stack, version, features) remains
+accurate. No change made — the document is a classification snapshot, not a live dashboard.
 
 ---
 
 ## Footer
 
-**Run date/time:** 2026-05-30 22:50:33 PDT
-**Branch:** docs/truth-up-2026-05-30
-**HEAD sha reconciled against:** d01a3cd912d1dd4fa7f5242dc4cb664d9283ad5f
+**Run date/time:** 2026-06-02 19:56:07 PDT
+**Branch:** docs/truth-up-2026-06-02
+**HEAD sha reconciled against:** bd59e96a50ca7fb8620a08531220a15edc95c43b

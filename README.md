@@ -12,7 +12,7 @@ TradeOffAtlas is a local-first desktop app for structured multi-criteria decisio
 - **Sensitivity analysis** — drag any criterion weight on a live chart and watch rankings respond, surfacing which factors your conclusion actually depends on
 - **Decision archive** — mark decisions as resolved with an outcome note; revisit past choices and the reasoning behind them
 - **Reusable templates** — save a criteria framework once and apply it across multiple decisions without re-entering weights
-- **PDF export** — generate a formatted summary of any decision to share or file away
+- **PDF and CSV export** — generate a formatted summary of any decision to share or file away
 
 ## Quick Start
 
@@ -59,7 +59,7 @@ npm run tauri build
 
 ## Architecture
 
-All data lives in a local SQLite database managed by the Tauri Rust backend — no sync, no cloud, nothing leaves your machine. The weighted scoring computation runs in the React layer for immediate feedback; the sensitivity analysis chart re-renders on every slider tick using memoized Recharts data. Decision templates are stored as JSON blobs in SQLite so they can be imported and exported without schema migrations.
+All data lives in a local SQLite database managed by the Tauri Rust backend — no sync, no cloud, nothing leaves your machine. The weighted scoring computation runs in the React layer for immediate feedback; the sensitivity analysis chart re-renders on every slider tick using memoized Recharts data. Decision templates are stored as normalized rows in SQLite — a `templates` table plus a `template_criteria` table — keeping criteria queryable without custom serialization.
 
 ## License
 
