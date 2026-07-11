@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import Database from "@tauri-apps/plugin-sql";
 import type {
 	Criterion,
@@ -10,10 +11,32 @@ import type {
 // ---------- Connection singleton ----------
 
 let db: Database | null = null;
+const DATABASE_URL = "sqlite:tradeoff-atlas.db";
+
+export type DatabaseInitializationResult = {
+	recoveredInterruptedRestore: boolean;
+	schemaVersion: number;
+};
+
+export async function initializeDatabase(): Promise<DatabaseInitializationResult> {
+	const result = await invoke<DatabaseInitializationResult>("initialize_database");
+	db = await Database.load(DATABASE_URL);
+	return result;
+}
+
+export async function closeDatabase(): Promise<void> {
+	if (!db) return;
+	await db.close(DATABASE_URL);
+	db = null;
+}
+
+export async function reopenDatabase(): Promise<void> {
+	db = await Database.load(DATABASE_URL);
+}
 
 export async function getDb(): Promise<Database> {
 	if (!db) {
-		db = await Database.load("sqlite:tradeoff-atlas.db");
+		db = await Database.load(DATABASE_URL);
 	}
 	return db;
 }
@@ -301,13 +324,25 @@ export async function deleteOption(id: number): Promise<void> {
 export async function reorderOptions(
 	items: { id: number; position: number }[],
 ): Promise<void> {
+	if (items.length === 0) return;
 	const conn = await getDb();
+	const caseClauses: string[] = [];
+	const values: number[] = [];
 	for (const item of items) {
-		await conn.execute("UPDATE options SET position = $1 WHERE id = $2", [
-			item.position,
-			item.id,
-		]);
+		const idIndex = values.length + 1;
+		values.push(item.id);
+		const positionIndex = values.length + 1;
+		values.push(item.position);
+		caseClauses.push(`WHEN $${idIndex} THEN $${positionIndex}`);
 	}
+	const idPlaceholders = items.map((item) => {
+		values.push(item.id);
+		return `$${values.length}`;
+	});
+	await conn.execute(
+		`UPDATE options SET position = CASE id ${caseClauses.join(" ")} ELSE position END WHERE id IN (${idPlaceholders.join(", ")})`,
+		values,
+	);
 }
 
 // ---------- Criteria ----------
@@ -390,13 +425,25 @@ export async function deleteCriterion(id: number): Promise<void> {
 export async function reorderCriteria(
 	items: { id: number; position: number }[],
 ): Promise<void> {
+	if (items.length === 0) return;
 	const conn = await getDb();
+	const caseClauses: string[] = [];
+	const values: number[] = [];
 	for (const item of items) {
-		await conn.execute("UPDATE criteria SET position = $1 WHERE id = $2", [
-			item.position,
-			item.id,
-		]);
+		const idIndex = values.length + 1;
+		values.push(item.id);
+		const positionIndex = values.length + 1;
+		values.push(item.position);
+		caseClauses.push(`WHEN $${idIndex} THEN $${positionIndex}`);
 	}
+	const idPlaceholders = items.map((item) => {
+		values.push(item.id);
+		return `$${values.length}`;
+	});
+	await conn.execute(
+		`UPDATE criteria SET position = CASE id ${caseClauses.join(" ")} ELSE position END WHERE id IN (${idPlaceholders.join(", ")})`,
+		values,
+	);
 }
 
 // ---------- Scores ----------
@@ -453,6 +500,20 @@ export async function createTemplate(data: {
 		[result.lastInsertId],
 	);
 	return mapTemplate(rows[0]);
+}
+
+export async function createTemplateWithCriteria(data: {
+	name: string;
+	description: string;
+	category: string;
+	criteria: {
+		name: string;
+		weight: number;
+		description: string;
+		position: number;
+	}[];
+}): Promise<Template> {
+	return invoke<Template>("create_template_with_criteria", { input: data });
 }
 
 export async function getTemplates(): Promise<Template[]> {
