@@ -83,21 +83,6 @@ export const useDecisionStore = create<DecisionState>((set, get) => ({
 			templateId: data.templateId,
 		});
 
-		if (data.templateId != null) {
-			const template = await db.getTemplateById(data.templateId);
-			if (template?.criteria) {
-				for (const tc of template.criteria) {
-					await db.createCriterion({
-						decisionId: decision.id,
-						name: tc.name,
-						weight: tc.weight,
-						description: tc.description,
-					});
-				}
-				await db.incrementTemplateUseCount(data.templateId);
-			}
-		}
-
 		await get().loadDecisions();
 		await get().setActiveDecision(decision.id);
 	},

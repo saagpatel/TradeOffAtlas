@@ -1,23 +1,20 @@
-use tauri_plugin_sql::{Migration, MigrationKind};
+mod durability;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let migrations = vec![Migration {
-        version: 1,
-        description: "create_initial_schema",
-        sql: include_str!("../../database/migrations/001_initial_schema.sql"),
-        kind: MigrationKind::Up,
-    }];
-
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
-        .plugin(
-            tauri_plugin_sql::Builder::default()
-                .add_migrations("sqlite:tradeoff-atlas.db", migrations)
-                .build(),
-        )
+        .plugin(tauri_plugin_sql::Builder::default().build())
+        .invoke_handler(tauri::generate_handler![
+            durability::initialize_database,
+            durability::create_backup,
+            durability::begin_restore,
+            durability::finalize_restore,
+            durability::rollback_restore,
+            durability::create_template_with_criteria,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

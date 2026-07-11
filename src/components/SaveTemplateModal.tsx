@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createTemplate, createTemplateCriteria } from "../lib/db";
+import { createTemplateWithCriteria } from "../lib/db";
 import { useDecisionStore } from "../store/decision-store";
 import { Modal } from "./Modal";
 
@@ -29,20 +29,17 @@ export function SaveTemplateModal({ open, onClose }: SaveTemplateModalProps) {
 		if (!name.trim() || criteria.length === 0 || submitting) return;
 		setSubmitting(true);
 		try {
-			const template = await createTemplate({
+			await createTemplateWithCriteria({
 				name: name.trim(),
 				description: description.trim(),
 				category: category.trim(),
-			});
-			await createTemplateCriteria(
-				template.id,
-				criteria.map((c) => ({
+				criteria: criteria.map((c) => ({
 					name: c.name,
 					weight: c.weight,
 					description: c.description,
 					position: c.position,
 				})),
-			);
+			});
 			handleClose();
 		} catch (err) {
 			console.error("Failed to save template:", err);

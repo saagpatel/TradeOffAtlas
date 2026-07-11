@@ -9,12 +9,14 @@ interface AppState {
 	sidebarCollapsed: boolean;
 	newDecisionModalOpen: boolean;
 	shortcutsHelpOpen: boolean;
+	dataSafetyModalOpen: boolean;
 	setActiveView: (view: AppView) => void;
 	navigatePrevView: () => void;
 	navigateNextView: () => void;
 	toggleSidebar: () => void;
 	setNewDecisionModalOpen: (open: boolean) => void;
 	setShortcutsHelpOpen: (open: boolean) => void;
+	setDataSafetyModalOpen: (open: boolean) => void;
 }
 
 export type { AppView };
@@ -25,6 +27,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 	sidebarCollapsed: false,
 	newDecisionModalOpen: false,
 	shortcutsHelpOpen: false,
+	dataSafetyModalOpen: false,
 	setActiveView: (view) => set({ activeView: view }),
 	navigatePrevView: () => {
 		const idx = VIEW_ORDER.indexOf(get().activeView);
@@ -40,4 +43,5 @@ export const useAppStore = create<AppState>((set, get) => ({
 		set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
 	setNewDecisionModalOpen: (open) => set({ newDecisionModalOpen: open }),
 	setShortcutsHelpOpen: (open) => set({ shortcutsHelpOpen: open }),
+	setDataSafetyModalOpen: (open) => set({ dataSafetyModalOpen: open }),
 }));

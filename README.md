@@ -13,6 +13,7 @@ TradeOffAtlas is a local-first desktop app for structured multi-criteria decisio
 - **Decision archive** — mark decisions as resolved with an outcome note; revisit past choices and the reasoning behind them
 - **Reusable templates** — save a criteria framework once and apply it across multiple decisions without re-entering weights
 - **PDF and CSV export** — generate a formatted summary of any decision to share or file away
+- **Verified backup and restore** — move the complete SQLite dataset between Macs with schema, integrity, and compatibility checks before replacement
 
 ## Quick Start
 
@@ -60,6 +61,12 @@ npm run tauri build
 ## Architecture
 
 All data lives in a local SQLite database managed by the Tauri Rust backend — no sync, no cloud, nothing leaves your machine. The weighted scoring computation runs in the React layer for immediate feedback; the sensitivity analysis chart re-renders on every slider tick using memoized Recharts data. Decision templates are stored as normalized rows in SQLite — a `templates` table plus a `template_criteria` table — keeping criteria queryable without custom serialization.
+
+### Data durability
+
+Open **Data Safety** in the sidebar to create or restore a complete backup. Backups use SQLite's consistent snapshot operation, include portable app/schema metadata, and never overwrite an existing file. Restore validates and migrates a temporary database before touching the active one, creates an automatic pre-restore backup, and keeps the original database available until the app has reopened the replacement successfully. If the app is interrupted during the swap, the next launch restores the preserved original automatically.
+
+To roll back a completed restore, open **Data Safety** and restore the `pre-restore-*.tradeoff-atlas.sqlite3` file reported by the successful restore. Encryption keys are not part of this contract because TradeOffAtlas does not encrypt its local SQLite database or hold user secrets.
 
 ## License
 

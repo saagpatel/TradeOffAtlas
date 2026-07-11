@@ -39,6 +39,7 @@ export function Sidebar() {
 	const activeView = useAppStore((s) => s.activeView);
 	const setActiveView = useAppStore((s) => s.setActiveView);
 	const setNewDecisionModalOpen = useAppStore((s) => s.setNewDecisionModalOpen);
+	const setDataSafetyModalOpen = useAppStore((s) => s.setDataSafetyModalOpen);
 
 	return (
 		<aside className="w-60 h-screen bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
@@ -86,8 +87,14 @@ export function Sidebar() {
 				))}
 			</div>
 
-			{/* New Decision button */}
-			<div className="p-4 border-t border-slate-800">
+			{/* Data safety and New Decision buttons */}
+			<div className="p-4 border-t border-slate-800 flex flex-col gap-2">
+				<button
+					onClick={() => setDataSafetyModalOpen(true)}
+					className="w-full border border-slate-700 text-slate-300 font-medium py-2.5 rounded-xl hover:bg-slate-800 hover:text-slate-100 transition-colors duration-150 text-sm"
+				>
+					Data Safety
+				</button>
 				<button
 					onClick={() => setNewDecisionModalOpen(true)}
 					className="w-full bg-accent-400 text-slate-950 font-semibold py-2.5 rounded-xl hover:bg-accent-500 transition-colors duration-150 text-sm flex items-center justify-center gap-2"
