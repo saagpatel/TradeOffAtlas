@@ -21,7 +21,7 @@
 		"jspdf": "4.2.1",
 		"jspdf-autotable": "5.0.7",
 		"react": "^19.1.0",
-		"react-dom": "^19.1.0",
+		"react-dom": "^19.2.8",
 		"recharts": "3.8.0",
 		"tailwindcss": "4.2.2",
 		"zustand": "5.0.12"
@@ -29,7 +29,7 @@
 	"devDependencies": {
 		"@tauri-apps/cli": "^2",
 		"@types/react": "^19.1.8",
-		"@types/react-dom": "^19.1.6",
+		"@types/react-dom": "^19.2.5",
 		"@vitejs/plugin-react": "^4.6.0",
 		"typescript": "~5.8.3",
 		"vite": "7.3.5",
