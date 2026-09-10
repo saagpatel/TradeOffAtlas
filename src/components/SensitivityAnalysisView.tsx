@@ -14,12 +14,15 @@ import { useDecisionStore } from "../store/decision-store";
 import {
 	useRankChanges,
 	useSensitivityRanking,
+	useBaselineRanking,
+	useSensitivitySummary,
 	useSensitivityStore,
 } from "../store/sensitivity-store";
 import { CriteriaWeightSlider } from "./CriteriaWeightSlider";
 import { EmptyState } from "./EmptyState";
 import { RadarChartWrapper } from "./RadarChart";
 import { RankChangeAlert } from "./RankChangeAlert";
+import { SensitivitySummary } from "./SensitivitySummary";
 
 export function SensitivityAnalysisView() {
 	const [saved, setSaved] = useState(false);
@@ -41,6 +44,8 @@ export function SensitivityAnalysisView() {
 	const updateBaseline = useSensitivityStore((s) => s.updateBaseline);
 
 	const sensitivityRanking = useSensitivityRanking();
+	const baselineRanking = useBaselineRanking();
+	const sensitivitySummary = useSensitivitySummary();
 	const rankChanges = useRankChanges();
 
 	const activeDecision = decisions.find((d) => d.id === activeDecisionId);
@@ -119,6 +124,7 @@ export function SensitivityAnalysisView() {
 						{criteria.map((c) => (
 							<CriteriaWeightSlider
 								key={c.id}
+								criterionId={c.id}
 								criterionName={c.name}
 								baselineWeight={baselineWeights[c.id] ?? c.weight}
 								currentWeight={weightOverrides[c.id] ?? c.weight}
@@ -136,10 +142,10 @@ export function SensitivityAnalysisView() {
 					</button>
 
 					{/* Option visibility toggles */}
-					<div className="mt-6">
-						<p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+					<fieldset className="mt-6">
+						<legend className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
 							Chart Visibility
-						</p>
+						</legend>
 						<div className="space-y-1.5">
 							{options.map((opt, i) => (
 								<label
@@ -161,11 +167,12 @@ export function SensitivityAnalysisView() {
 								</label>
 							))}
 						</div>
-					</div>
+					</fieldset>
 				</div>
 
 				{/* Right panel: Charts */}
 				<div className="w-2/3 overflow-y-auto p-6 space-y-6">
+					<SensitivitySummary summary={sensitivitySummary} />
 					{/* Radar chart */}
 					<div className="bg-slate-900/50 rounded-xl p-4">
 						<RadarChartWrapper
@@ -227,6 +234,66 @@ export function SensitivityAnalysisView() {
 							</BarChart>
 						</ResponsiveContainer>
 					</div>
+
+					<section
+						aria-labelledby="ranking-details-heading"
+						className="bg-slate-900/50 rounded-xl p-4"
+					>
+						<h3
+							id="ranking-details-heading"
+							className="text-sm font-semibold text-slate-400 mb-3"
+						>
+							Ranking details
+						</h3>
+						<div className="overflow-x-auto">
+							<table className="w-full text-left text-sm">
+								<caption className="sr-only">
+									Baseline and current ranks with the current weighted score
+								</caption>
+								<thead className="text-xs uppercase tracking-wider text-slate-500">
+									<tr>
+										<th scope="col" className="pb-2 pr-3">Option</th>
+										<th scope="col" className="pb-2 px-3">Baseline</th>
+										<th scope="col" className="pb-2 px-3">Current</th>
+										<th scope="col" className="pb-2 px-3">Change</th>
+										<th scope="col" className="pb-2 pl-3 text-right">Score</th>
+									</tr>
+								</thead>
+								<tbody className="text-slate-300">
+									{sortedRankings.map((ranking) => {
+										const baseline = baselineRanking.find(
+											(item) => item.optionId === ranking.optionId,
+										);
+										return (
+											<tr key={ranking.optionId} className="border-t border-slate-800">
+												<th scope="row" className="py-2 pr-3 font-medium text-slate-200">
+													{ranking.optionName}
+												</th>
+												<td className="py-2 px-3">
+													{baseline ? `#${baseline.rank}` : "—"}
+												</td>
+													<td className="py-2 px-3 font-semibold text-slate-200">
+														#{ranking.rank}
+													</td>
+													<td className="py-2 px-3 text-slate-400">
+														{baseline
+															? baseline.rank === ranking.rank
+																? "No change"
+																: baseline.rank > ranking.rank
+																	? `Up ${baseline.rank - ranking.rank}`
+																	: `Down ${ranking.rank - baseline.rank}`
+																	: "New"}
+													</td>
+													<td className="py-2 pl-3 text-right font-mono">
+													{ranking.weightedTotal.toFixed(1)}
+												</td>
+											</tr>
+										);
+									})}
+								</tbody>
+							</table>
+						</div>
+					</section>
 
 					{/* Rank change alert */}
 					<RankChangeAlert rankChanges={rankChanges} />

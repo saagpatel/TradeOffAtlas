@@ -5,6 +5,7 @@ import {
 	detectRankChanges,
 	maxPossibleScore,
 	rankOptions,
+	summarizeSensitivity,
 } from "./scoring";
 
 function makeCriterion(
@@ -265,5 +266,67 @@ describe("detectRankChanges", () => {
 			},
 		];
 		expect(detectRankChanges(baseline, current)).toEqual([]);
+	});
+});
+
+describe("summarizeSensitivity", () => {
+	const baseline = [
+		{
+			optionId: 1,
+			optionName: "Option A",
+			weightedTotal: 58,
+			normalizedScore: 72.5,
+			rank: 1,
+			scores: {},
+		},
+		{
+			optionId: 2,
+			optionName: "Option B",
+			weightedTotal: 52,
+			normalizedScore: 65,
+			rank: 2,
+			scores: {},
+		},
+	];
+
+	it("reports a stable winner and score margins", () => {
+		const summary = summarizeSensitivity(baseline, baseline);
+
+		expect(summary.status).toBe("stable");
+		expect(summary.baselineLeader?.optionName).toBe("Option A");
+		expect(summary.currentLeader?.optionName).toBe("Option A");
+		expect(summary.baselineMargin).toBe(6);
+		expect(summary.currentMargin).toBe(6);
+		expect(summary.rankChangeCount).toBe(0);
+	});
+
+	it("reports a leader flip and counts both moved options", () => {
+		const current = [
+			{ ...baseline[1], weightedTotal: 63, normalizedScore: 78.75, rank: 1 },
+			{ ...baseline[0], weightedTotal: 60, normalizedScore: 75, rank: 2 },
+		];
+		const summary = summarizeSensitivity(baseline, current);
+
+		expect(summary.status).toBe("flipped");
+		expect(summary.currentLeader?.optionName).toBe("Option B");
+		expect(summary.currentMargin).toBe(3);
+		expect(summary.rankChangeCount).toBe(2);
+	});
+
+	it("marks a tied current result as fragile", () => {
+		const current = [
+			{ ...baseline[0], weightedTotal: 55, normalizedScore: 70, rank: 1 },
+			{ ...baseline[1], weightedTotal: 55, normalizedScore: 70, rank: 2 },
+		];
+
+		expect(summarizeSensitivity(baseline, current).status).toBe("tied");
+	});
+
+	it("fails informatively when there are no ranked options", () => {
+		const summary = summarizeSensitivity([], []);
+
+		expect(summary.status).toBe("empty");
+		expect(summary.currentLeader).toBeNull();
+		expect(summary.currentMargin).toBeNull();
 	});
 });
