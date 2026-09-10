@@ -322,6 +322,22 @@ describe("summarizeSensitivity", () => {
 		expect(summarizeSensitivity(baseline, current).status).toBe("tied");
 	});
 
+	it("keeps a tie status when tie-break order differs from baseline", () => {
+		const baselineWithOptionBLeader = [
+			{ ...baseline[1], weightedTotal: 60, normalizedScore: 75, rank: 1 },
+			{ ...baseline[0], weightedTotal: 54, normalizedScore: 67.5, rank: 2 },
+		];
+		const current = [
+			{ ...baseline[0], weightedTotal: 55, normalizedScore: 70, rank: 1 },
+			{ ...baseline[1], weightedTotal: 55, normalizedScore: 70, rank: 2 },
+		];
+
+		const summary = summarizeSensitivity(baselineWithOptionBLeader, current);
+
+		expect(summary.status).toBe("tied");
+		expect(summary.currentMargin).toBe(0);
+	});
+
 	it("fails informatively when there are no ranked options", () => {
 		const summary = summarizeSensitivity([], []);
 

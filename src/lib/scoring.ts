@@ -106,10 +106,10 @@ export function summarizeSensitivity(
 
 	let status: SensitivityStatus = "empty";
 	if (currentLeader) {
-		if (baselineLeader && currentLeader.optionId !== baselineLeader.optionId) {
-			status = "flipped";
-		} else if (currentMargin !== null && Math.abs(currentMargin) < 0.0001) {
+		if (currentMargin !== null && Math.abs(currentMargin) < 0.0001) {
 			status = "tied";
+		} else if (baselineLeader && currentLeader.optionId !== baselineLeader.optionId) {
+			status = "flipped";
 		} else if (rankChangeCount > 0) {
 			status = "reordered";
 		} else {
