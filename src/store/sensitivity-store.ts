@@ -1,6 +1,10 @@
 import { useMemo } from "react";
 import { create } from "zustand";
-import { detectRankChanges, rankOptions } from "../lib/scoring";
+import {
+	detectRankChanges,
+	rankOptions,
+	summarizeSensitivity,
+} from "../lib/scoring";
 import type { Criterion } from "../types";
 import { useDecisionStore } from "./decision-store";
 
@@ -101,6 +105,17 @@ export function useRankChanges() {
 
 	return useMemo(
 		() => detectRankChanges(baseline, current),
+		[baseline, current],
+	);
+}
+
+// Hook: summarize winner stability and score margin for the active weights.
+export function useSensitivitySummary() {
+	const baseline = useBaselineRanking();
+	const current = useSensitivityRanking();
+
+	return useMemo(
+		() => summarizeSensitivity(baseline, current),
 		[baseline, current],
 	);
 }
