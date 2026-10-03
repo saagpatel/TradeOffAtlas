@@ -12,6 +12,7 @@ export function RankBadge({ rank }: RankBadgeProps) {
 	const variantClass = variants[rank] ?? "bg-slate-700 text-slate-300";
 	return (
 		<span
+			aria-label={`Rank ${rank}`}
 			className={`inline-flex items-center justify-center min-w-8 h-7 rounded-full px-2 text-xs font-mono font-bold ${variantClass}`}
 		>
 			#{rank}
