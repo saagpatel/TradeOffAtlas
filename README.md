@@ -19,7 +19,7 @@ TradeOffAtlas is a local-first desktop app for structured multi-criteria decisio
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20.19+ in the Node 20 line, or 22.12+ (Vite 8 and plugin-react 6); Node 18 is unsupported
 - npm 9+
 - Rust stable toolchain (via [rustup](https://rustup.rs))
 - macOS, Windows, or Linux desktop environment
@@ -29,7 +29,7 @@ TradeOffAtlas is a local-first desktop app for structured multi-criteria decisio
 ```bash
 git clone https://github.com/saagpatel/TradeOffAtlas.git
 cd TradeOffAtlas
-npm install
+npm ci
 ```
 
 ### Usage
@@ -44,6 +44,32 @@ npm test
 # Production build
 npm run tauri build
 ```
+
+## Verification
+
+Run commands from the repository root after `npm ci` (use the committed
+`package-lock.json`). For a focused deterministic scoring check:
+
+```bash
+npm test -- src/lib/scoring.test.ts
+```
+
+Broader frontend checks are `npm test`, `npx tsc --noEmit`, and `npm run build`.
+`npm run build` also runs TypeScript before bundling. No lint or formatter script
+is configured; do not treat the former generic `make lint` target as a check.
+The Makefile wraps the npm commands and exposes `make typecheck`.
+
+Desktop changes additionally need a stable Rust toolchain, Cargo, and the native
+Tauri prerequisites for the target OS. From `src-tauri`, use `cargo fmt -- --check`
+and `cargo check`; `npm run tauri build` builds the desktop package from the root.
+Browser-only `npm run dev` does not supply Tauri's SQLite/dialog APIs.
+
+For changed scoring, charts, exports, shortcuts, or backup/restore behavior, run
+`npm run tauri dev` in a disposable OS profile with synthetic decisions. Check the
+changed workflow, empty/error states, and keyboard use. Backup/restore replaces
+application data: use a disposable database, never your existing decisions as a
+test fixture. These UI checks are conditional; pure documentation changes do not
+require launching the app.
 
 ## Tech Stack
 
