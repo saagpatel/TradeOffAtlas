@@ -1,5 +1,21 @@
 import type { Criterion, Option, OptionScore, RankChange } from "../types";
 
+export type SensitivityStatus =
+	| "stable"
+	| "reordered"
+	| "flipped"
+	| "tied"
+	| "empty";
+
+export interface SensitivitySummary {
+	baselineLeader: OptionScore | null;
+	currentLeader: OptionScore | null;
+	baselineMargin: number | null;
+	currentMargin: number | null;
+	rankChangeCount: number;
+	status: SensitivityStatus;
+}
+
 /** Compute weighted score for a single option given criteria weights */
 export function computeWeightedScore(
 	scores: Record<number, number>,
@@ -75,4 +91,43 @@ export function detectRankChanges(
 				triggeredByCriterionId: -1,
 			};
 		});
+}
+
+/** Summarize whether the current decision is stable under the active weights. */
+export function summarizeSensitivity(
+	baseline: OptionScore[],
+	current: OptionScore[],
+): SensitivitySummary {
+	const baselineLeader = baseline[0] ?? null;
+	const currentLeader = current[0] ?? null;
+	const baselineMargin = scoreMargin(baseline);
+	const currentMargin = scoreMargin(current);
+	const rankChangeCount = detectRankChanges(baseline, current).length;
+
+	let status: SensitivityStatus = "empty";
+	if (currentLeader) {
+		if (currentMargin !== null && Math.abs(currentMargin) < 0.0001) {
+			status = "tied";
+		} else if (baselineLeader && currentLeader.optionId !== baselineLeader.optionId) {
+			status = "flipped";
+		} else if (rankChangeCount > 0) {
+			status = "reordered";
+		} else {
+			status = "stable";
+		}
+	}
+
+	return {
+		baselineLeader,
+		currentLeader,
+		baselineMargin,
+		currentMargin,
+		rankChangeCount,
+		status,
+	};
+}
+
+function scoreMargin(ranking: OptionScore[]): number | null {
+	if (ranking.length < 2) return null;
+	return ranking[0].weightedTotal - ranking[1].weightedTotal;
 }
