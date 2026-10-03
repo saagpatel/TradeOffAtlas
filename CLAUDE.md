@@ -1,25 +1,32 @@
 # Tradeoff Atlas
 
-Local-first Tauri 2.0 desktop app for multi-criteria decision modeling — define decisions, score options against weighted criteria, run sensitivity analysis, save templates, archive past decisions. Solo use only; all data in SQLite on-device, no backend, no sync.
+Local-first Tauri 2 desktop app for multi-criteria decision modeling — define decisions, score options against weighted criteria, run sensitivity analysis, save templates, archive past decisions. Solo use only; all data in SQLite on-device, no backend, no sync.
 
 ## Stack
-- Shell: Tauri 2.0 (Rust sidecar, macOS-first)
-- Frontend: React 19 + TypeScript (strict mode)
+- Shell: Tauri 2 (Rust backend, macOS-first)
+- Frontend: React 19 + TypeScript 7.0 (strict mode)
 - Storage: SQLite via `@tauri-apps/plugin-sql`
 - Charts: Recharts 3.x — radar chart + bar chart for sensitivity analysis
 - Styling: Tailwind CSS 4.x (utility-first, dark theme default)
-- Build: Vite 7.x
+- Build: Vite 8.x
 
 ## Build / Test / Run
 
 ```bash
+# Install locked dependencies (npm; package-lock.json)
+npm ci
+
 # Development mode
 npm run tauri dev
 
 # Run tests
 npm test
 
-# Production build
+# Frontend typecheck and production build
+make typecheck
+npm run build
+
+# Desktop production build (requires native Tauri prerequisites)
 npm run tauri build
 ```
 
@@ -54,7 +61,7 @@ v1.0.0 — Shipped (all phases complete; see IMPLEMENTATION-ROADMAP.md for phase
 
 ## What This Project Is
 
-A local-first Tauri 2.0 desktop app for multi-criteria decision modeling. Define decisions, score options against weighted criteria, run sensitivity analysis, save reusable templates, and archive past decisions with outcomes. Built for solo use — all data stored in SQLite on-device, no backend, no sync.
+A local-first Tauri 2 desktop app for multi-criteria decision modeling. Define decisions, score options against weighted criteria, run sensitivity analysis, save reusable templates, and archive past decisions with outcomes. Built for solo use — all data stored in SQLite on-device, no backend, no sync.
 
 ## Current State
 
@@ -62,23 +69,30 @@ A local-first Tauri 2.0 desktop app for multi-criteria decision modeling. Define
 
 ## Stack
 
-- Shell: Tauri 2.0 (Rust sidecar, macOS-first)
-- Frontend: React 19 + TypeScript (strict mode)
+- Shell: Tauri 2 (Rust backend, macOS-first)
+- Frontend: React 19 + TypeScript 7.0 (strict mode)
 - Storage: SQLite via `@tauri-apps/plugin-sql`
 - Charts: Recharts 3.x — radar chart + bar chart for sensitivity analysis
 - Styling: Tailwind CSS 4.x (utility-first, dark theme default)
-- Build: Vite 7.x
+- Build: Vite 8.x
 
 ## How To Run
 
 ```bash
+# Install locked dependencies (npm; package-lock.json)
+npm ci
+
 # Development mode
 npm run tauri dev
 
 # Run tests
 npm test
 
-# Production build
+# Frontend typecheck and production build
+make typecheck
+npm run build
+
+# Desktop production build (requires native Tauri prerequisites)
 npm run tauri build
 ```
 
