@@ -19,7 +19,7 @@ TradeOffAtlas is a local-first desktop app for structured multi-criteria decisio
 
 ### Prerequisites
 
-- Node.js 20.19+ in the Node 20 line, or 22.12+ (Vite 8 and plugin-react 6); Node 18 is unsupported
+- Node.js 20.19+ (20.x), 22.12+ (22.x), or 24+ (Vite 8 and plugin-react 6); Node 18 is unsupported
 - npm 9+
 - Rust stable toolchain (via [rustup](https://rustup.rs))
 - macOS, Windows, or Linux desktop environment
