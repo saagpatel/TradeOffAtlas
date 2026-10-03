@@ -20,7 +20,7 @@ TradeOffAtlas is a local-first desktop app for structured multi-criteria decisio
 ### Prerequisites
 
 - Node.js 20.19+ (20.x), 22.12+ (22.x), or 24+ (Vite 8 and plugin-react 6); Node 18 is unsupported
-- npm 9+
+- npm (use the committed `package-lock.json`; no npm version is pinned)
 - Rust stable toolchain (via [rustup](https://rustup.rs))
 - macOS, Windows, or Linux desktop environment
 
@@ -56,7 +56,7 @@ npm test -- src/lib/scoring.test.ts
 
 Broader frontend checks are `npm test`, `npx tsc --noEmit`, and `npm run build`.
 `npm run build` also runs TypeScript before bundling. No lint or formatter script
-is configured; do not treat the former generic `make lint` target as a check.
+is configured.
 The Makefile wraps the npm commands and exposes `make typecheck`.
 
 Desktop changes additionally need a stable Rust toolchain, Cargo, and the native
@@ -76,12 +76,13 @@ require launching the app.
 | Layer | Technology |
 |-------|------------|
 | Desktop shell | Tauri 2 |
-| Frontend | React 19, TypeScript 5.8 |
+| Frontend | React 19, TypeScript 7.0 |
 | Styling | Tailwind CSS 4 |
 | State | Zustand 5 |
 | Charts | Recharts 3 |
 | Database | SQLite via tauri-plugin-sql |
 | Export | jsPDF + jspdf-autotable |
+| Build | Vite 8, @vitejs/plugin-react 6 |
 | Tests | Vitest 4 |
 
 ## Architecture
